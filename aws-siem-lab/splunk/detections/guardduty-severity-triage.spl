@@ -1,0 +1,14 @@
+# Detection: GuardDuty Findings Triage by Severity
+# MITRE ATT&CK: varies by finding type (see docs/mitre-mapping.md)
+# Purpose: surface all GuardDuty findings grouped by severity tier, with
+# duplicate findings collapsed into a count instead of flooding the view.
+
+index=aws_security sourcetype="aws:guardduty"
+| eval severity_label=case(
+    severity>=7, "High",
+    severity>=4, "Medium",
+    severity>=1, "Low"
+  )
+| stats count as occurrences, latest(_time) as last_seen by title, type, severity_label
+| sort -severity_label, -occurrences
+| convert ctime(last_seen)

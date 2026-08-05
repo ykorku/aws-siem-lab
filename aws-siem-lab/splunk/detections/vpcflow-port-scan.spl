@@ -1,0 +1,10 @@
+# Detection: Potential Port Scan (VPC Flow Logs)
+# MITRE ATT&CK: T1595 - Active Scanning / T1046 - Network Service Discovery
+# Purpose: flag a source IP that got REJECTed while attempting many
+# different destination ports in a short window -- the classic signature
+# of a port scan, since normal traffic doesn't touch that many ports.
+
+index=aws_security sourcetype="aws:cloudwatchlogs:vpcflow" action="REJECT"
+| stats dc(dstport) as unique_ports_attempted, count as attempts by srcaddr, dstaddr
+| where unique_ports_attempted > 15
+| sort -unique_ports_attempted

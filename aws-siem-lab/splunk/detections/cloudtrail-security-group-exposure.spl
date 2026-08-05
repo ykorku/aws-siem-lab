@@ -1,0 +1,10 @@
+# Detection: CloudTrail Security Group Opened to the Internet
+# MITRE ATT&CK: T1562.007 - Impair Defenses: Disable or Modify Cloud Firewall
+# Purpose: catch security group ingress rules that open a port to
+# 0.0.0.0/0 (the entire internet) -- one of the most common real-world
+# cloud misconfigurations.
+
+index=aws_security sourcetype="aws:cloudtrail" eventName="AuthorizeSecurityGroupIngress"
+  requestParameters.ipPermissions.items{}.ipRanges{}.cidrIp="0.0.0.0/0"
+| table _time, userIdentity.arn, requestParameters.groupId, requestParameters.ipPermissions.items{}.fromPort, requestParameters.ipPermissions.items{}.toPort, sourceIPAddress
+| sort -_time

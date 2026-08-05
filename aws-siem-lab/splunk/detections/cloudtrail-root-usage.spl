@@ -1,0 +1,9 @@
+# Detection: CloudTrail Root Account Usage
+# MITRE ATT&CK: T1078.004 - Valid Accounts: Cloud Accounts
+# Purpose: flag any API call made with the AWS account root credentials.
+# Best practice is root should almost never be used day-to-day, so any
+# hit here is inherently suspicious.
+
+index=aws_security sourcetype="aws:cloudtrail" userIdentity.type="Root"
+| table _time, eventName, userIdentity.arn, sourceIPAddress, awsRegion
+| sort -_time

@@ -1,0 +1,10 @@
+# Detection: CloudTrail IAM Policy Changes
+# MITRE ATT&CK: T1098 - Account Manipulation
+# Purpose: catch any of the several distinct API calls that can grant
+# additional IAM permissions (inline policies, managed policy attachment,
+# or modification of an existing managed policy's rules).
+
+index=aws_security sourcetype="aws:cloudtrail"
+  eventName IN ("PutUserPolicy", "PutRolePolicy", "AttachUserPolicy", "AttachRolePolicy", "CreatePolicyVersion", "PutGroupPolicy", "AttachGroupPolicy")
+| table _time, eventName, userIdentity.arn, requestParameters.policyName, requestParameters.userName, requestParameters.roleName, sourceIPAddress
+| sort -_time

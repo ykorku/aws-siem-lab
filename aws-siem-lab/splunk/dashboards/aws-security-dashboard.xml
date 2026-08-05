@@ -1,0 +1,68 @@
+<dashboard version="1.1" theme="light">
+  <label>AWS Security Operations Dashboard</label>
+  <row>
+    <panel>
+      <title>Panel 1</title>
+      <chart>
+        <title>Findings by severity</title>
+        <search>
+          <query>index=aws_security sourcetype="aws:guardduty"
+| eval severity_label=case(severity&gt;=7, "High", severity&gt;=4, "Medium", severity&gt;=1, "Low")
+| stats count by severity_label</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Panel 2</title>
+      <chart>
+        <title>Event volume by sourcetype over time</title>
+        <search>
+          <query>index=aws_security
+| timechart span=1h count by sourcetype</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Panel 3</title>
+      <table>
+        <title>Recent high-severity GuardDuty findings</title>
+        <search>
+          <query>index=aws_security sourcetype="aws:guardduty" severity&gt;=7
+| table _time, title, type, severity
+| sort -_time
+| head 10</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Panel 4</title>
+      <chart>
+        <search>
+          <query>index=aws_security sourcetype="aws:cloudtrail" userIdentity.type="Root"
+| timechart span=1h count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+</dashboard>
