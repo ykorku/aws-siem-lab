@@ -65,6 +65,7 @@ A few things that came up building this, worth knowing if you're replicating it:
 - **GuardDuty has no native decoder in Splunk's SQS-based S3 input.** The option exists in the UI but isn't wired to a working parser (confirmed via Splunk's own community forum — this isn't unique to this setup). Ingested instead via the `CustomLogs` decoder with a manually-set sourcetype, parsed at search time with `spath`.
 - **S3 bucket versioning requires `s3:GetObjectVersion`** as a separate IAM permission from `s3:GetObject` — easy to miss since most tutorials only grant the latter.
 - **SQS's `ChangeMessageVisibility` permission is required** by Splunk's input even though it's not immediately obvious why a *consumer* needs to modify message visibility (it's how the consumer extends its own processing lock while working).
+- **The Splunk Add-on for AWS silently renames VPC Flow Log fields/values** to Splunk's CIM vocabulary (`ACCEPT`/`REJECT` → `allowed`/`blocked`, `srcaddr`/`dstaddr`/`dstport` → `src_ip`/`dest_ip`/`dest_port`). Two detections initially used AWS's raw field names, passed a syntax check, and silently matched zero events for days until caught during manual verification by deliberately firing the events they were meant to catch. All 6 detections in this repo have since been confirmed against real triggering events, not just validated for syntax.
 
 ## Cost
 
