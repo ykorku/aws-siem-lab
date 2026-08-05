@@ -42,6 +42,7 @@ GuardDuty ──┘
 │       └── aws-security-dashboard.xml
 └── docs/
     └── mitre-mapping.md       # Every detection mapped to its MITRE ATT&CK technique
+    └── testing-guide.md       # To check if the system is working as intended
 ```
 
 ## Detections
