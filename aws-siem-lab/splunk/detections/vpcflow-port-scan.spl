@@ -1,10 +1,17 @@
 # Detection: Potential Port Scan (VPC Flow Logs)
 # MITRE ATT&CK: T1595 - Active Scanning / T1046 - Network Service Discovery
-# Purpose: flag a source IP that got REJECTed while attempting many
+# Purpose: flag a source IP that got blocked while attempting many
 # different destination ports in a short window -- the classic signature
 # of a port scan, since normal traffic doesn't touch that many ports.
+#
+# Note: field/value names below (action="blocked", dest_port, src_ip,
+# dest_ip) are Splunk CIM-normalized names, NOT the raw AWS VPC Flow Log
+# values (ACCEPT/REJECT, dstport, srcaddr, dstaddr). The Splunk Add-on
+# for AWS silently renames these at parse time -- an earlier version of
+# this detection used the raw AWS names, passed a syntax check, and
+# silently matched zero events until caught during manual verification.
 
-index=aws_security sourcetype="aws:cloudwatchlogs:vpcflow" action="REJECT"
-| stats dc(dstport) as unique_ports_attempted, count as attempts by srcaddr, dstaddr
+index=aws_security sourcetype="aws:cloudwatchlogs:vpcflow" action="blocked"
+| stats dc(dest_port) as unique_ports_attempted, count as attempts by src_ip, dest_ip
 | where unique_ports_attempted > 15
 | sort -unique_ports_attempted

@@ -1,11 +1,16 @@
 # Detection: SSH Reachable from the Public Internet (VPC Flow Logs)
 # MITRE ATT&CK: T1021.004 - Remote Services: SSH
-# Purpose: flag successful (ACCEPT) connections to port 22 originating
+# Purpose: flag successful (allowed) connections to port 22 originating
 # from outside the private RFC 1918 address ranges -- meaning SSH is
 # reachable from the open internet, a common and dangerous misconfig.
+#
+# Note: field/value names below (action="allowed", dest_port, src_ip,
+# dest_ip) are Splunk CIM-normalized names, NOT the raw AWS VPC Flow Log
+# values (ACCEPT/REJECT, dstport, srcaddr, dstaddr). See
+# vpcflow-port-scan.spl for the full story on this catch.
 
-index=aws_security sourcetype="aws:cloudwatchlogs:vpcflow" dstport=22 action="ACCEPT"
-| eval src_type=if(match(srcaddr, "^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.)"), "internal", "external")
+index=aws_security sourcetype="aws:cloudwatchlogs:vpcflow" dest_port=22 action="allowed"
+| eval src_type=if(match(src_ip, "^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.)"), "internal", "external")
 | where src_type="external"
-| stats count as connections by srcaddr, dstaddr
+| stats count as connections by src_ip, dest_ip
 | sort -connections
